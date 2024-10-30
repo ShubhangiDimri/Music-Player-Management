@@ -1,45 +1,53 @@
 import os
 
-def add_song():
-    title = input("Enter song title: ")
-    artist = input("Enter artist name: ")
-    album = input("Enter album name: ")
-    duration = input("Enter duration: ")
-    song = {'title': title, 'artist': artist, 'album': album, 'duration': duration}
-    songs.append(song)
-    print("Song added successfully!")
-    
-    
-    with open('test_file.txt', 'a') as test_file:
-        test_file.write(f"{song['title']},{song['artist']},{song['album']},{song['duration']}\n")
-    print("Song details appended to test file!")
+class Song:
+    def __init__(self, title, artist, album, duration):
+        self.title = title
+        self.artist = artist
+        self.album = album
+        self.duration = duration
 
-def display_songs():
-    if not songs:
-        print("No songs in the library.")
-    else:
-        for i, song in enumerate(songs, 1):
-            print(f"{i}. {song['title']} - {song['artist']} ({song['album']}) [{song['duration']}]")
+    def display_info(self):
+        print(f"{self.title} - {self.artist} ({self.album}) [{self.duration}]")
 
-def save_songs():
-    with open('song_library.txt', 'w') as file:
-        for song in songs:
-            file.write(f"{song['title']},{song['artist']},{song['album']},{song['duration']}\n")
-    print("Song library saved to file.")
+class MusicLibrary:
+    def __init__(self):
+        self.songs = []
 
-def load_songs():
-    if os.path.exists('song_library.txt'):
-        with open('song_library.txt', 'r') as file:
-            for line in file:
-                title, artist, album, duration = line.strip().split(',')
-                songs.append({'title': title, 'artist': artist, 'album': album, 'duration': duration})
-        print("Song library loaded from file.")
-    else:
-        print("No saved song library found.")
-def display_library():
-    print("\nComplete Song Library:")
-    display_songs()
+    def add_song(self, song):
+        self.songs.append(song)
 
+    def display_songs(self):
+        if not self.songs:
+            print("No songs in the library.")
+        else:
+            for i, song in enumerate(self.songs, 1):
+                print(f"{i}. ", end="")
+                song.display_info()
+
+    def save_to_file(self, filename):
+        with open(filename, "w") as file:
+            for song in self.songs:
+                file.write(f"{song.title},{song.artist},{song.album},{song.duration}\n")
+        print("Song library saved to file.")
+
+    def load_from_file(self, filename):
+        if os.path.exists(filename):
+            with open(filename, "r") as file:
+                for line in file:
+                    title, artist, album, duration = line.strip().split(",")
+                    self.songs.append(Song(title, artist, album, duration))
+            print("Song library loaded from file.")
+        else:
+            print("No saved song library found.")
+
+class MusicPlayer:
+    def __init__(self, library):
+        self.library = library
+
+    def display_library(self):
+        print("\nComplete Song Library:")
+        self.library.display_songs()
 
 def menu():
     print("\nMusic Player Management System")
@@ -47,29 +55,38 @@ def menu():
     print("2. Display Songs")
     print("3. Save Songs to File")
     print("4. Load Songs from File")
-    print("5. display library")
+    print("5. Display Library")
     print("6. Exit")
 
+def add_song_to_library(library):
+    title = input("Enter song title: ")
+    artist = input("Enter artist name: ")
+    album = input("Enter album name: ")
+    duration = input("Enter duration: ")
+    song = Song(title, artist, album, duration)
+    library.add_song(song)
+    print("Song added successfully!")
 
-global songs
-songs = []
+library = MusicLibrary()
+player = MusicPlayer(library)
 
 while True:
     menu()
     choice = input("Enter your choice: ")
 
-    if choice == '1':
-        add_song()
-    elif choice == '2':
-        display_songs()
-    elif choice == '3':
-        save_songs()
-    elif choice == '4':
-        load_songs()
-    elif choice == '5':
-        display_library()
-    elif choice=='6':
-        print("exiting..")
+    if choice == "1":
+        add_song_to_library(library)
+    elif choice == "2":
+        library.display_songs()
+    elif choice == "3":
+        library.save_to_file("song_library.txt")  # Use double quotes for string literals
+    elif choice == "4":
+        library.load_from_file("song_library.txt")
+    elif choice == "5":
+        player.display_library()
+    elif choice == "6":
+        print("Exiting...")
         break
     else:
         print("Invalid choice. Please enter a valid option.")
+
