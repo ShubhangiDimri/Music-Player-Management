@@ -1,0 +1,119 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Structure to represent a song
+struct Song {
+    char title[100];
+    char artist[100];
+    char duration[10];
+    struct Song* prev;
+    struct Song* next;
+};
+
+// Structure to represent a playlist
+struct Playlist {
+    struct Song* head;
+    struct Song* tail;
+};
+
+// Function to create a new song node
+struct Song* createSong(char title[], char artist[], char duration[]) {
+    struct Song* newSong = (struct Song*)malloc(sizeof(struct Song));
+    strcpy(newSong->title, title);
+    strcpy(newSong->artist, artist);
+    strcpy(newSong->duration, duration);
+    newSong->prev = NULL;
+    newSong->next = NULL;
+    return newSong;
+}
+
+// Function to add a song to the playlist
+void addSong(struct Playlist* playlist, char title[], char artist[], char duration[]) {
+    struct Song* newSong = createSong(title, artist, duration);
+    if (playlist->head == NULL) {
+        playlist->head = newSong;
+        playlist->tail = newSong;
+    } else {
+        newSong->prev = playlist->tail;
+        playlist->tail->next = newSong;
+        playlist->tail = newSong;
+    }
+}
+
+// Function to display the playlist
+void displayPlaylist(struct Playlist* playlist) {
+    struct Song* currentSong = playlist->head;
+    printf("Playlist:\n");
+    while (currentSong != NULL) {
+        printf("Title: %s, Artist: %s, Duration: %s\n", currentSong->title, currentSong->artist, currentSong->duration);
+        currentSong = currentSong->next;
+    }
+}
+
+// Function to search for a song in the playlist
+void searchSong(struct Playlist* playlist, char title[]) {
+    struct Song* currentSong = playlist->head;
+    while (currentSong != NULL) {
+        if (strcmp(currentSong->title, title) == 0) {
+            printf("Title: %s, Artist: %s, Duration: %s\n", currentSong->title, currentSong->artist, currentSong->duration);
+            return;
+        }
+        currentSong = currentSong->next;
+    }
+    printf("Song not found.\n");
+}
+
+// Function to remove a song from the playlist
+void removeSong(struct Playlist* playlist, char title[]) {
+    struct Song* currentSong = playlist->head;
+    while (currentSong != NULL) {
+        if (strcmp(currentSong->title, title) == 0) {
+            if (currentSong == playlist->head) {
+                playlist->head = currentSong->next;
+                if (playlist->head != NULL)
+                    playlist->head->prev = NULL;
+            } else if (currentSong == playlist->tail) {
+                playlist->tail = currentSong->prev;
+                if (playlist->tail != NULL)
+                    playlist->tail->next = NULL;
+            } else {
+                currentSong->prev->next = currentSong->next;
+                currentSong->next->prev = currentSong->prev;
+            }
+            free(currentSong);
+            printf("%s has been removed from the playlist.\n", title);
+            return;
+        }
+        currentSong = currentSong->next;
+    }
+    printf("Song not found in the playlist.\n");
+}
+
+int main() {
+    struct Playlist playlist;
+    playlist.head = NULL;
+    playlist.tail = NULL;
+
+    // Adding songs
+    addSong(&playlist, "Bohemian Rhapsody", "Queen", "5:55");
+    addSong(&playlist, "Shape of You", "Ed Sheeran", "3:54");
+    addSong(&playlist, "Dancing Queen", "ABBA", "3:51");
+
+    // Displaying playlist
+    displayPlaylist(&playlist);
+
+    // Searching for a song
+    printf("\nSearching for 'Bohemian Rhapsody':\n");
+    searchSong(&playlist, "Bohemian Rhapsody");
+
+    // Removing a song
+    printf("\nRemoving 'Shape of You':\n");
+    removeSong(&playlist, "Shape of You");
+
+    // Displaying updated playlist
+    printf("\nUpdated Playlist:\n");
+    displayPlaylist(&playlist);
+
+    return 0;
+}
